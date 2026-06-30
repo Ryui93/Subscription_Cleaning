@@ -1236,7 +1236,7 @@
       cancel: ["해지예정 항목이 없습니다.", "줄이고 싶은 결제를 해지예정으로 바꾸면 여기만 모아볼 수 있습니다."],
       keep: ["유지 항목이 없습니다.", "계속 쓸 결제를 유지로 바꾸면 따로 모아볼 수 있습니다."],
       unknown: ["모름 항목이 없습니다.", "확인이 필요한 결제를 모름으로 두면 여기에서 다시 볼 수 있습니다."],
-      all: ["자동결제 후보가 아직 없습니다.", "결제 알림을 넣으면 목록이 채워집니다."],
+      all: ["자동결제 후보가 아직 없습니다.", "결제내역을 붙여넣으면 목록이 채워집니다."],
     };
     const [title, description] = messages[state.filter] || messages.all;
     empty.querySelector("strong").textContent = title;
