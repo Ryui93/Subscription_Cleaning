@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <meta
+      name="description"
+      content="구독청소 사용 방법. 결제 알림을 붙여넣고 자동결제 후보와 해지예정 절약액을 확인하는 방법을 안내합니다."
+    />
+    <title>사용 방법 - 구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="구독청소 홈">
+        <img src="assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav" aria-label="주요 페이지">
+        <a href="index.html">앱 열기</a>
+        <a href="about.html">소개</a>
+        <a href="articles/subscription-checklist.html">글 모음</a>
+        <a href="contact.html">문의</a>
+      </nav>
+    </header>
+
+    <main class="content-shell">
+      <section class="content-hero">
+        <p class="panel-kicker">사용 방법</p>
+        <h1>결제 알림을 붙여넣고 반복결제 후보를 확인하세요.</h1>
+        <p>
+          처음에는 샘플 버튼으로 흐름을 확인하고, 이후 본인의 카드 승인 문자나 카드앱 결제
+          알림을 붙여넣어 사용할 수 있습니다.
+        </p>
+      </section>
+
+      <section class="content-list">
+        <article>
+          <h2>1. 결제내역을 준비합니다</h2>
+          <p>
+            최근 2~3개월치 카드 승인 문자, 카드앱 결제 알림, 통장 거래내역, CSV/TSV 형태의
+            텍스트를 준비합니다.
+          </p>
+        </article>
+        <article>
+          <h2>2. 구독청소에 붙여넣습니다</h2>
+          <p>
+            결제 알림 넣기 영역에 텍스트를 붙여넣고 분석 버튼을 누르면 날짜, 결제처, 금액,
+            카드사 정보를 추출합니다.
+          </p>
+        </article>
+        <article>
+          <h2>3. 자동결제 후보를 확인합니다</h2>
+          <p>
+            같은 결제처가 비슷한 주기로 반복되면 구독 후보로 표시됩니다. 신뢰도와 감지 이유를
+            함께 확인할 수 있습니다.
+          </p>
+        </article>
+        <article>
+          <h2>4. 유지/해지예정/모름으로 나눕니다</h2>
+          <p>
+            계속 쓸 항목은 유지, 줄이고 싶은 항목은 해지예정, 확인이 필요한 항목은 모름으로
+            분류합니다. 해지예정 항목은 예상 절약액에 반영됩니다.
+          </p>
+        </article>
+      </section>
+
+      <section class="content-note">
+        <h2>주의할 점</h2>
+        <p>
+          구독청소는 금융 자문, 결제 해지 대행, 카드사 조회 서비스를 제공하지 않습니다. 분석
+          결과는 사용자가 결제 내역을 정리하기 위한 참고 정보입니다.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="about.html">소개</a>
+          <a href="guide.html">사용 방법</a>
+          <a href="privacy.html">개인정보 처리방침</a>
+          <a href="terms.html">이용약관</a>
+          <a href="contact.html">문의</a>
+          <a href="sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

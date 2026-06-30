@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <title>구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="구독청소 홈">
+        <img src="assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav app-page-nav" aria-label="주요 페이지">
+        <a href="about.html">소개</a>
+        <a href="guide.html">사용 방법</a>
+        <a href="articles/subscription-checklist.html">글 모음</a>
+        <a href="contact.html">문의</a>
+      </nav>
+      <div class="top-actions">
+        <button class="icon-button" id="installButton" type="button" title="앱 설치" aria-label="앱 설치">
+          ⤓
+        </button>
+        <button
+          class="icon-button theme-button"
+          id="themeButton"
+          type="button"
+          title="다크모드"
+          aria-label="다크모드"
+          aria-pressed="false"
+        >
+          ☾
+        </button>
+        <button class="icon-button" id="resetButton" type="button" title="초기화" aria-label="초기화">
+          ↺
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="summary-band" aria-labelledby="summaryTitle">
+        <div class="summary-title">
+          <p class="panel-kicker">구독청소 v0.1</p>
+          <h1 id="summaryTitle">이번 달 자동결제</h1>
+        </div>
+        <div class="summary-amount">
+          <span>월 예상</span>
+          <strong id="monthlyTotal">0원</strong>
+        </div>
+        <div class="summary-stats" aria-label="요약">
+          <div class="summary-stat">
+            <span>후보</span>
+            <strong id="candidateCount">0개</strong>
+          </div>
+          <div class="summary-stat danger">
+            <span>해지예정</span>
+            <strong id="cancelCount">0개</strong>
+          </div>
+        </div>
+        <span class="save-state" id="saveState">로컬 저장</span>
+      </section>
+
+      <section class="goal-strip" aria-labelledby="goalTitle">
+        <div class="goal-copy">
+          <p class="panel-kicker">목표</p>
+          <h2 id="goalTitle">월 절약 목표</h2>
+        </div>
+        <div class="goal-meter" aria-label="절약 목표 진행률">
+          <div class="goal-meter-top">
+            <strong id="goalSavedAmount">0원</strong>
+            <span id="goalStatusText">해지예정 항목을 골라보세요.</span>
+          </div>
+          <div class="progress-track">
+            <span id="goalProgressBar"></span>
+          </div>
+        </div>
+        <form class="goal-form" id="goalForm">
+          <label for="goalInput">목표금액</label>
+          <div class="goal-input-row">
+            <input id="goalInput" type="text" inputmode="numeric" autocomplete="off" placeholder="50,000" />
+            <button class="secondary-button compact" type="submit">저장</button>
+          </div>
+          <button class="ghost-button compact goal-filter-button" id="cancelFocusButton" type="button">
+            해지예정 보기
+          </button>
+        </form>
+      </section>
+
+      <section class="workspace">
+        <section class="tool-panel input-area" aria-labelledby="inputTitle">
+          <div class="panel-title-row">
+            <div>
+              <p class="panel-kicker">입력</p>
+              <h2 id="inputTitle">결제 알림 넣기</h2>
+            </div>
+            <button class="ghost-button" id="sampleButton" type="button">샘플</button>
+          </div>
+
+          <div class="helper-box intro-helper">
+            <strong>처음 사용한다면</strong>
+            <p>
+              카드 승인 문자, 카드앱 결제 알림, 통장 거래내역을 붙여넣으면 반복되는 자동결제
+              후보를 찾아드립니다. 입력한 내용은 <b>서버로 전송되지 않고</b> 현재 브라우저에만
+              저장됩니다.
+            </p>
+          </div>
+
+          <label class="field-label" for="paymentInput">붙여넣기</label>
+          <div class="paste-box">
+            <textarea
+              id="paymentInput"
+              spellcheck="false"
+              placeholder="06/02 NETFLIX 17,000원 승인&#10;06/05 쿠팡와우 7,890원 결제&#10;06/09 APPLE.COM/BILL 14,900원"
+            ></textarea>
+          </div>
+
+          <div class="action-row">
+            <button class="primary-button" id="analyzeButton" type="button">분석</button>
+            <button class="secondary-button" id="manualToggleButton" type="button">수동 추가</button>
+          </div>
+
+          <form class="manual-form" id="manualForm" hidden>
+            <label>
+              날짜
+              <input id="manualDate" type="date" />
+            </label>
+            <label>
+              결제처
+              <input id="manualMerchant" type="text" autocomplete="off" />
+            </label>
+            <label>
+              금액
+              <input id="manualAmount" type="number" min="0" step="1" />
+            </label>
+            <label>
+              통화
+              <select id="manualCurrency">
+                <option value="KRW">KRW</option>
+                <option value="USD">USD</option>
+                <option value="JPY">JPY</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </label>
+            <button class="primary-button compact" type="submit">추가</button>
+          </form>
+        </section>
+
+        <section class="tool-panel report-area" id="reportArea" aria-labelledby="reportTitle">
+          <div class="panel-title-row">
+            <div>
+              <p class="panel-kicker">정리</p>
+              <h2 id="reportTitle">청소할 목록</h2>
+            </div>
+          </div>
+
+          <div class="helper-box confidence-helper">
+            <p>
+              신뢰도는 같은 결제처가 비슷한 주기로 반복된 정도입니다. 100%가 아니어도 실제
+              구독일 수 있습니다.
+            </p>
+          </div>
+
+          <div class="segmented" role="tablist" aria-label="상태 필터">
+            <button class="segment active" data-filter="all" type="button">전체</button>
+            <button class="segment" data-filter="keep" type="button">유지</button>
+            <button class="segment" data-filter="cancel" type="button">해지예정</button>
+            <button class="segment" data-filter="unknown" type="button">모름</button>
+          </div>
+
+          <div class="cancel-summary" id="cancelSummary" hidden></div>
+          <div class="card-summary" id="cardSummary" aria-label="카드별 묶음"></div>
+          <div class="subscription-list" id="subscriptionList"></div>
+        </section>
+
+        <section class="tool-panel transaction-area" aria-labelledby="transactionTitle">
+          <div class="panel-title-row">
+            <div>
+              <p class="panel-kicker">원문</p>
+              <h2 id="transactionTitle">거래 목록</h2>
+            </div>
+            <span class="save-state" id="transactionCount">0건</span>
+          </div>
+          <div class="transaction-list" id="transactionList"></div>
+        </section>
+
+        <section class="tool-panel feedback-area" aria-labelledby="feedbackTitle">
+          <div class="panel-title-row">
+            <div>
+              <p class="panel-kicker">문의</p>
+              <h2 id="feedbackTitle">고객 요청 방명록</h2>
+            </div>
+            <span class="save-state" id="feedbackCount">0건</span>
+          </div>
+
+          <p class="safety-note">
+            카드번호 전체, 주민번호, 비밀번호, 인증서, 계좌번호 전체는 남기지 마세요.
+          </p>
+
+          <form class="feedback-form" id="feedbackForm">
+            <label>
+              유형
+              <select id="feedbackType">
+                <option value="분석 오류">분석 오류</option>
+                <option value="결제처 추가">결제처 추가</option>
+                <option value="해지 방법">해지 방법</option>
+                <option value="기능 제안">기능 제안</option>
+                <option value="기타">기타</option>
+              </select>
+            </label>
+            <label>
+              이름
+              <input id="feedbackName" type="text" autocomplete="name" placeholder="선택" />
+            </label>
+            <label class="feedback-contact">
+              이메일
+              <input id="feedbackContact" type="text" autocomplete="email" placeholder="선택" />
+            </label>
+            <label class="feedback-message-field">
+              내용
+              <textarea
+                class="feedback-message"
+                id="feedbackMessage"
+                placeholder="예: APPLE.COM/BILL이 카드 정보 없음으로 잡혀요. 나중에 카드사 연동이 필요해 보여요."
+              ></textarea>
+            </label>
+            <div class="feedback-actions">
+              <button class="primary-button compact" type="submit">남기기</button>
+              <button class="secondary-button compact" id="clearFeedbackButton" type="button">전체 삭제</button>
+            </div>
+          </form>
+
+          <div class="feedback-list" id="feedbackList"></div>
+        </section>
+
+        <section class="tool-panel data-area" aria-labelledby="dataTitle">
+          <div class="panel-title-row">
+            <div>
+              <p class="panel-kicker">보관</p>
+              <h2 id="dataTitle">데이터 관리</h2>
+            </div>
+            <span class="save-state">로컬 전용</span>
+          </div>
+          <div class="data-actions">
+            <button class="secondary-button compact" id="exportDataButton" type="button">백업 파일 받기</button>
+            <button class="secondary-button compact danger-button" id="clearAllDataButton" type="button">
+              전체 데이터 삭제
+            </button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="about.html">소개</a>
+          <a href="guide.html">사용 방법</a>
+          <a href="privacy.html">개인정보 처리방침</a>
+          <a href="terms.html">이용약관</a>
+          <a href="contact.html">문의</a>
+          <a href="sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+
+    <template id="emptyTemplate">
+      <div class="empty-state">
+        <strong>자동결제 후보가 아직 없습니다.</strong>
+        <span>결제 알림을 넣으면 목록이 채워집니다.</span>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

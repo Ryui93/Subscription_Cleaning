@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <meta
+      name="description"
+      content="구독청소가 v0.1.0에서 localStorage 기반 로컬 저장을 선택한 이유와 장단점을 설명합니다."
+    />
+    <title>로컬 저장 방식의 장단점 - 구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="구독청소 홈">
+        <img src="../assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav" aria-label="주요 페이지">
+        <a href="../index.html">앱 열기</a>
+        <a href="../guide.html">사용 방법</a>
+        <a href="../sitemap.html">사이트맵</a>
+      </nav>
+    </header>
+
+    <main class="content-shell article-shell">
+      <article class="content-hero article-hero">
+        <p class="panel-kicker">개인정보</p>
+        <h1>로컬 저장 방식의 장단점</h1>
+        <p>
+          구독청소 v0.1.0은 로그인과 서버 저장 없이 시작했습니다. 결제내역처럼 민감할 수 있는
+          정보를 다루기 때문에, 처음에는 현재 브라우저 안에서만 분석하는 방식을 선택했습니다.
+        </p>
+      </article>
+
+      <section class="content-list article-body">
+        <article>
+          <h2>장점: 서버로 보내지 않습니다</h2>
+          <p>
+            사용자가 붙여넣은 결제 알림은 현재 브라우저에서 분석됩니다. 서버 저장이나 외부 DB가
+            없기 때문에, 초기 MVP에서 개인정보 부담을 낮출 수 있습니다.
+          </p>
+        </article>
+        <article>
+          <h2>장점: 가입 없이 바로 쓸 수 있습니다</h2>
+          <p>
+            이메일 가입, 비밀번호, 본인인증을 요구하지 않습니다. 사용자는 샘플로 흐름을 확인한
+            뒤 본인의 결제 알림을 붙여넣어 바로 분석할 수 있습니다.
+          </p>
+        </article>
+        <article>
+          <h2>단점: 기기를 바꾸면 이어지지 않습니다</h2>
+          <p>
+            localStorage는 현재 브라우저에 저장되므로 다른 기기나 다른 브라우저로 자동 동기화되지
+            않습니다. 필요한 경우 백업 파일 받기 기능으로 데이터를 따로 보관해야 합니다.
+          </p>
+        </article>
+        <article>
+          <h2>단점: 브라우저 데이터를 지우면 사라집니다</h2>
+          <p>
+            사용자가 브라우저 저장공간을 삭제하면 구독청소 데이터도 함께 지워질 수 있습니다.
+            중요한 정리 결과는 백업 파일로 내려받는 것이 안전합니다.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="../about.html">소개</a>
+          <a href="../guide.html">사용 방법</a>
+          <a href="../privacy.html">개인정보 처리방침</a>
+          <a href="../terms.html">이용약관</a>
+          <a href="../contact.html">문의</a>
+          <a href="../sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

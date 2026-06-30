@@ -1,0 +1,11 @@
+{
+  "name": "subscription-cleaning",
+  "version": "0.1.0",
+  "private": true,
+  "description": "구독청소 정적 PWA MVP",
+  "scripts": {
+    "check": "node --check app.js && node --check tests/parser-smoke.js && node --check sw.js",
+    "test": "node tests/parser-smoke.js",
+    "serve": "python -m http.server 5173"
+  }
+}

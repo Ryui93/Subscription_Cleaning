@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="구독청소 아이콘">
+  <rect width="128" height="128" rx="26" fill="#17785f"/>
+  <path d="M34 38h60v12H34z" fill="#fffdf8"/>
+  <path d="M42 56h44v42a8 8 0 0 1-8 8H50a8 8 0 0 1-8-8z" fill="#fffdf8"/>
+  <path d="M51 67h26M51 80h26M51 93h16" stroke="#17785f" stroke-width="7" stroke-linecap="round"/>
+  <path d="M48 30h32l5 8H43z" fill="#f2c46d"/>
+</svg>

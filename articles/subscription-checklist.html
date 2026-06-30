@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <meta
+      name="description"
+      content="매달 빠져나가는 자동결제와 구독을 점검하는 체크리스트. 카드 알림과 결제내역을 기준으로 확인할 항목을 정리했습니다."
+    />
+    <title>자동결제 점검 체크리스트 - 구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="구독청소 홈">
+        <img src="../assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav" aria-label="주요 페이지">
+        <a href="../index.html">앱 열기</a>
+        <a href="../guide.html">사용 방법</a>
+        <a href="../sitemap.html">사이트맵</a>
+      </nav>
+    </header>
+
+    <main class="content-shell article-shell">
+      <article class="content-hero article-hero">
+        <p class="panel-kicker">구독 관리</p>
+        <h1>자동결제 점검 체크리스트</h1>
+        <p>
+          자동결제는 한 번 등록하면 잊기 쉽습니다. 매달 빠져나가는 금액을 줄이려면 전체 지출을
+          다 기록하기보다 반복되는 항목부터 확인하는 편이 빠릅니다.
+        </p>
+      </article>
+
+      <section class="content-list article-body">
+        <article>
+          <h2>1. 최근 3개월 내역을 한 곳에 모읍니다</h2>
+          <p>
+            카드앱, 문자 알림, 간편결제 앱, 통장 거래내역에서 최근 3개월 정도의 결제 알림을
+            모아보세요. 자동결제는 보통 매월 비슷한 날짜와 금액으로 반복되기 때문에 1개월치만
+            보는 것보다 2~3개월치를 보는 편이 정확합니다.
+          </p>
+        </article>
+        <article>
+          <h2>2. 같은 결제처가 반복되는지 봅니다</h2>
+          <p>
+            `NETFLIX`, `APPLE.COM/BILL`, `쿠팡와우`, `OPENAI *CHATGPT`처럼 같은 이름이 반복되면
+            구독이나 멤버십일 가능성이 있습니다. 이름이 조금 달라도 핵심 결제처가 같으면 같은
+            항목으로 묶어 보는 것이 좋습니다.
+          </p>
+        </article>
+        <article>
+          <h2>3. 유지할 이유가 있는지 적어봅니다</h2>
+          <p>
+            자주 쓰는 서비스라면 유지가 맞습니다. 다만 최근 한 달 동안 사용하지 않았거나, 가족
+            공유와 중복되거나, 무료 대체 서비스가 있는 경우에는 해지예정으로 분류해도 좋습니다.
+          </p>
+        </article>
+        <article>
+          <h2>4. 결제 전 알림이 필요한 항목을 고릅니다</h2>
+          <p>
+            연간 결제, 해외 구독, 업무용 SaaS처럼 금액이 큰 항목은 다음 결제일 전에 다시
+            확인해야 합니다. 다음 예상 결제일을 적어두면 결제 후에 후회하는 일을 줄일 수 있습니다.
+          </p>
+        </article>
+        <article>
+          <h2>5. 해지예정 금액을 월 단위로 봅니다</h2>
+          <p>
+            구독을 정리할 때는 총액보다 월 절약액을 보는 편이 실감이 납니다. 7,900원, 14,900원
+            같은 금액도 여러 개가 모이면 한 달 식비나 통신비 일부를 줄이는 효과가 생깁니다.
+          </p>
+        </article>
+      </section>
+
+      <section class="content-note">
+        <h2>구독청소로 확인하기</h2>
+        <p>
+          직접 모은 결제 알림을 <a href="../index.html">구독청소 앱</a>에 붙여넣으면 반복되는
+          자동결제 후보와 해지예정 절약액을 한 화면에서 볼 수 있습니다.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="../about.html">소개</a>
+          <a href="../guide.html">사용 방법</a>
+          <a href="../privacy.html">개인정보 처리방침</a>
+          <a href="../terms.html">이용약관</a>
+          <a href="../contact.html">문의</a>
+          <a href="../sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <meta
+      name="description"
+      content="구독청소는 카드 승인 문자와 결제 알림을 붙여넣어 반복되는 자동결제 후보를 찾는 모바일 웹 도구입니다."
+    />
+    <title>소개 - 구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="구독청소 홈">
+        <img src="assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav" aria-label="주요 페이지">
+        <a href="index.html">앱 열기</a>
+        <a href="guide.html">사용 방법</a>
+        <a href="articles/subscription-checklist.html">글 모음</a>
+        <a href="contact.html">문의</a>
+      </nav>
+    </header>
+
+    <main class="content-shell">
+      <section class="content-hero">
+        <p class="panel-kicker">서비스 소개</p>
+        <h1>자동결제와 구독성 지출을 빠르게 점검합니다.</h1>
+        <p>
+          구독청소는 가계부처럼 모든 지출을 기록하는 서비스가 아니라, 매달 반복해서 빠져나가는
+          돈을 찾아 정리하는 생활비 점검 도구입니다.
+        </p>
+        <p>
+          이 프로젝트는 자동결제가 너무 여러 앱에 흩어져 있다는 작은 불편에서 시작했습니다.
+          은행이나 카드사에 바로 연결하기보다, 먼저 사용자가 직접 붙여넣은 내역만 브라우저 안에서
+          분석하는 방식으로 시작해 개인정보 부담을 낮추는 것을 운영 원칙으로 삼고 있습니다.
+        </p>
+        <a class="primary-link" href="index.html">구독청소 시작하기</a>
+      </section>
+
+      <section class="content-grid">
+        <article class="content-card">
+          <h2>무엇을 하나요?</h2>
+          <p>
+            카드 승인 문자, 카드앱 결제 알림, 통장 거래내역 텍스트를 붙여넣으면 날짜, 결제처,
+            금액을 추출하고 반복되는 결제 후보를 보여줍니다.
+          </p>
+        </article>
+        <article class="content-card">
+          <h2>왜 필요한가요?</h2>
+          <p>
+            OTT, 쇼핑 멤버십, 앱스토어, AI 도구, 클라우드, 렌탈 결제는 여러 앱에 흩어져 있어
+            사용자가 한눈에 확인하기 어렵습니다.
+          </p>
+        </article>
+        <article class="content-card">
+          <h2>어떻게 저장되나요?</h2>
+          <p>
+            v0.1.0은 API, 로그인, 서버 저장을 사용하지 않습니다. 입력한 내용과 분석 결과는 현재
+            브라우저의 localStorage에만 저장됩니다.
+          </p>
+        </article>
+      </section>
+
+      <section class="content-list">
+        <article>
+          <h2>운영 원칙</h2>
+          <p>
+            구독청소는 결제 데이터를 대신 조회하거나 해지를 대행하지 않습니다. 사용자가 가진
+            결제 알림을 보기 쉽게 정리하고, 어떤 항목을 확인해야 하는지 스스로 판단할 수 있게
+            돕는 도구입니다.
+          </p>
+        </article>
+        <article>
+          <h2>앞으로의 방향</h2>
+          <p>
+            실제 카드 알림 샘플을 더 모아 파서 정확도를 높이고, 사용자가 자주 헷갈리는 결제처와
+            구독 관리 방법을 글로 정리해 사이트 안에서 함께 제공할 예정입니다.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="about.html">소개</a>
+          <a href="guide.html">사용 방법</a>
+          <a href="privacy.html">개인정보 처리방침</a>
+          <a href="terms.html">이용약관</a>
+          <a href="contact.html">문의</a>
+          <a href="sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

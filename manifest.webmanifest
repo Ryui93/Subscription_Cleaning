@@ -1,0 +1,18 @@
+{
+  "name": "구독청소",
+  "short_name": "구독청소",
+  "description": "자동결제와 구독성 지출을 찾아 정리하는 모바일 웹",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f4f6f1",
+  "theme_color": "#f4f6f1",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
