@@ -1,4 +1,4 @@
-const CACHE_NAME = "subscription-cleaning-v19";
+const CACHE_NAME = "subscription-cleaning-v20";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,10 +9,17 @@ const ASSETS = [
   "./contact.html",
   "./sitemap.html",
   "./articles/subscription-checklist.html",
+  "./articles/auto-payment-check.html",
   "./articles/card-message-guide.html",
+  "./articles/card-alert-subscription.html",
+  "./articles/coupang-ott-appstore-checklist.html",
   "./articles/ott-subscription-saving.html",
+  "./articles/before-cancel-subscription.html",
+  "./articles/auto-payment-vs-transfer.html",
+  "./articles/subscription-cleaning-example.html",
   "./articles/ai-tool-subscription.html",
   "./articles/local-storage-privacy.html",
+  "./articles/browser-only-privacy.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",

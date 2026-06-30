@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <meta
+      name="description"
+      content="구독 서비스를 해지하기 전에 결제일, 환불, 보관 데이터, 가족 공유를 확인하는 방법입니다."
+    />
+    <title>구독 서비스 해지 전 확인할 것 - 구독청소</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("subscription-cleaning:theme");
+        if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      })();
+    </script>
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="구독청소 홈">
+        <img src="../assets/icon.svg" alt="" class="brand-icon" />
+        <span>
+          <strong>구독청소</strong>
+          <small>Subscription Cleaning</small>
+        </span>
+      </a>
+      <nav class="page-nav" aria-label="주요 페이지">
+        <a href="../index.html">앱 열기</a>
+        <a href="../guide.html">사용 방법</a>
+        <a href="../sitemap.html">사이트맵</a>
+      </nav>
+    </header>
+
+    <main class="content-shell article-shell">
+      <article class="content-hero article-hero">
+        <p class="panel-kicker">해지 전 확인</p>
+        <h1>구독 서비스 해지 전 확인할 것</h1>
+        <p>
+          해지는 빠르게 할 수 있지만, 결제일과 데이터 보관 조건을 확인하지 않으면 예상하지 못한
+          불편이 생길 수 있습니다.
+        </p>
+      </article>
+
+      <section class="content-list article-body">
+        <article>
+          <h2>다음 결제일을 먼저 확인합니다</h2>
+          <p>
+            결제일 하루 전에는 이미 결제 준비가 진행되는 서비스도 있습니다. 해지하려는 항목은
+            결제 예정일보다 여유 있게 확인하는 것이 좋습니다.
+          </p>
+        </article>
+        <article>
+          <h2>환불 가능 여부를 확인합니다</h2>
+          <p>
+            일부 서비스는 결제 후 바로 취소해도 환불이 제한될 수 있습니다. 반대로 앱스토어,
+            카드사, 서비스 고객센터를 통해 환불 요청 절차가 따로 있는 경우도 있습니다.
+          </p>
+        </article>
+        <article>
+          <h2>보관 데이터와 다운로드 가능 여부를 봅니다</h2>
+          <p>
+            클라우드, 디자인 도구, AI 도구는 해지 후 저장 파일이나 작업 기록 접근이 제한될 수
+            있습니다. 필요한 파일은 해지 전에 내려받아 두는 편이 안전합니다.
+          </p>
+        </article>
+        <article>
+          <h2>가족이나 팀 사용 여부를 확인합니다</h2>
+          <p>
+            혼자 쓰지 않는 구독이라면 가족 공유, 팀 계정, 회사 업무와 연결되어 있을 수 있습니다.
+            해지예정으로 표시한 뒤 하루 정도 확인 시간을 두면 실수로 필요한 구독을 끊는 일을
+            줄일 수 있습니다.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong>구독청소</strong>
+        <nav aria-label="하단 링크">
+          <a href="../about.html">소개</a>
+          <a href="../guide.html">사용 방법</a>
+          <a href="../privacy.html">개인정보 처리방침</a>
+          <a href="../terms.html">이용약관</a>
+          <a href="../contact.html">문의</a>
+          <a href="../sitemap.html">사이트맵</a>
+        </nav>
+        <span>문의: <a href="mailto:axds89@gmail.com">axds89@gmail.com</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

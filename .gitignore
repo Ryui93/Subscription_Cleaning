@@ -6,3 +6,5 @@ Thumbs.db
 .env.*
 .vercel/
 .netlify/
+
+.vercel

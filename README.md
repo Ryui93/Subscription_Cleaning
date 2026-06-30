@@ -116,16 +116,23 @@ cmd.exe /c npm test
 - `contact.html`
 - `sitemap.html`
 - `articles/subscription-checklist.html`
+- `articles/auto-payment-check.html`
 - `articles/card-message-guide.html`
+- `articles/card-alert-subscription.html`
+- `articles/coupang-ott-appstore-checklist.html`
 - `articles/ott-subscription-saving.html`
+- `articles/before-cancel-subscription.html`
+- `articles/auto-payment-vs-transfer.html`
+- `articles/subscription-cleaning-example.html`
 - `articles/ai-tool-subscription.html`
 - `articles/local-storage-privacy.html`
+- `articles/browser-only-privacy.html`
 - `vercel.json`
 - `netlify.toml`
 - `manifest.webmanifest`
 - `sw.js`
 
-아직 실제 Netlify/Vercel 배포와 공개 URL 생성은 진행 전입니다.
+Vercel 배포와 공개 URL 확인까지 진행했습니다.
 
 배포 방법은 [배포 가이드](docs/deploy.md)를 참고하세요.
 
