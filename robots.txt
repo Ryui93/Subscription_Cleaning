@@ -1,0 +1,4 @@
+﻿User-agent: *
+Allow: /
+
+Sitemap: https://subscription-cleaning.vercel.app/sitemap.xml
