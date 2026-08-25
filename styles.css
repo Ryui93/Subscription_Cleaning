@@ -1102,101 +1102,39 @@ select:focus {
   align-items: center;
 }
 
-.ai-button {
-  min-height: 38px;
-  border: 1px solid rgba(109, 92, 164, 0.35);
-  border-radius: 8px;
-  padding: 0 10px;
-  background: rgba(109, 92, 164, 0.09);
-  color: #5c4d8f;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-.ai-button:hover {
-  background: rgba(109, 92, 164, 0.16);
-}
-
 .ai-usage {
   border-color: rgba(109, 92, 164, 0.28) !important;
   color: #5c4d8f !important;
   background: rgba(109, 92, 164, 0.08) !important;
 }
 
-.ai-modal[hidden] {
-  display: none;
-}
-
-.ai-modal {
-  position: fixed;
-  z-index: 20;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 18px;
-}
-
-.ai-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(13, 27, 22, 0.58);
-}
-
-.ai-modal-dialog {
-  position: relative;
-  width: min(560px, 100%);
-  max-height: min(720px, calc(100dvh - 36px));
-  overflow: auto;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 18px;
-  background: var(--surface);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-}
-
-.ai-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.ai-modal-header h2 {
-  margin: 0;
-}
-
-.ai-modal-status {
-  margin: 14px 0 8px;
+.ai-batch-status {
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.5;
 }
 
-.ai-modal-content {
-  min-height: 180px;
-  margin: 0;
+.ai-insight-block {
+  margin-top: 12px;
+  border-top: 1px solid var(--soft-line);
+  padding-top: 12px;
+}
+
+.ai-insight-block strong {
+  display: block;
+  color: #5c4d8f;
+  font-size: 13px;
+}
+
+.ai-insight-block p {
+  margin: 7px 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  border: 1px solid var(--soft-line);
-  border-radius: 8px;
-  padding: 14px;
-  background: var(--soft);
   color: var(--text);
-  font: inherit;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
-.ai-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-body.modal-open {
-  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .transaction-row {

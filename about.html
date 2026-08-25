@@ -93,9 +93,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <article class="content-card">
           <h2>어떻게 저장되나요?</h2>
           <p>
-            기본 분석은 API 키 없이 브라우저에서 실행됩니다. 사용자가 후보별 AI 설명을 요청하면
+            기본 분석은 API 키 없이 브라우저에서 실행됩니다. 사용자가 분석을 누르면 전체 후보의
             결제처·금액·주기·상태 같은 최소 요약값만 Vercel 서버 함수가 Google Gemini API에
-            전달합니다. API 키는 브라우저에 노출하지 않습니다.
+            한 번에 전달합니다. API 키는 브라우저에 노출하지 않습니다.
           </p>
         </article>
       </section>
@@ -104,8 +104,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <article>
           <h2>실행 중 AI</h2>
           <p>
-            Google Gemini API를 사용해 자동결제 후보 설명, 해지 우선순위, 월·1년 절약액과 다음
-            행동을 구조화해 보여줍니다. 사용량 초과 및 API 오류 시 로컬 분석 fallback을 제공합니다.
+            Google Gemini API를 사용해 전체 자동결제 후보의 설명, 해지 우선순위, 월·1년 절약액과
+            다음 행동을 한 번에 구조화해 보여줍니다. 하루 7회 제한과 API 오류 시 로컬 분석 fallback을 제공합니다.
           </p>
         </article>
         <article>

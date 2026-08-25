@@ -3,7 +3,7 @@
   const FEEDBACK_KEY = "subscription-cleaning:feedback:v1";
   const THEME_KEY = "subscription-cleaning:theme";
   const AI_USAGE_KEY = "subscription-cleaning:ai-usage:v1";
-  const AI_DAILY_LIMIT = 5;
+  const AI_DAILY_LIMIT = 7;
   const today = new Date();
   let deferredInstallPrompt = null;
 
@@ -134,6 +134,7 @@
     unknown: "모름",
   };
   const state = loadState();
+  state.aiInsights = state.aiInsights && typeof state.aiInsights === "object" ? state.aiInsights : {};
   const feedbackState = {
     entries: loadFeedback(),
   };
@@ -164,6 +165,7 @@
     candidateCount: document.querySelector("#candidateCount"),
     cancelCount: document.querySelector("#cancelCount"),
     aiUsage: document.querySelector("#aiUsage"),
+    aiBatchStatus: document.querySelector("#aiBatchStatus"),
     goalSavedAnnual: document.querySelector("#goalSavedAnnual"),
     cardSummary: document.querySelector("#cardSummary"),
     cancelSummary: document.querySelector("#cancelSummary"),
@@ -183,16 +185,7 @@
     clearAllDataButton: document.querySelector("#clearAllDataButton"),
     saveState: document.querySelector("#saveState"),
     emptyTemplate: document.querySelector("#emptyTemplate"),
-    aiModal: document.querySelector("#aiModal"),
-    aiModalTitle: document.querySelector("#aiModalTitle"),
-    aiModalStatus: document.querySelector("#aiModalStatus"),
-    aiModalContent: document.querySelector("#aiModalContent"),
-    aiModalClose: document.querySelector("#aiModalClose"),
-    aiModalRetry: document.querySelector("#aiModalRetry"),
-    aiModalDone: document.querySelector("#aiModalDone"),
   };
-
-  let activeAiCandidate = null;
 
   elements.input.value = state.inputText;
   elements.manualDate.valueAsDate = today;
@@ -212,18 +205,6 @@
   elements.clearFeedbackButton.addEventListener("click", clearFeedback);
   elements.exportDataButton.addEventListener("click", exportLocalData);
   elements.clearAllDataButton.addEventListener("click", clearAllLocalData);
-  elements.subscriptionList.addEventListener("click", handleSubscriptionClick);
-  elements.aiModalClose.addEventListener("click", closeAiModal);
-  elements.aiModalDone.addEventListener("click", closeAiModal);
-  elements.aiModalRetry.addEventListener("click", () => {
-    if (activeAiCandidate) requestAiInsight(activeAiCandidate);
-  });
-  elements.aiModal.addEventListener("click", (event) => {
-    if (event.target.matches("[data-ai-close]")) closeAiModal();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !elements.aiModal.hidden) closeAiModal();
-  });
   document.querySelectorAll(".segment").forEach((button) => {
     button.addEventListener("click", () => setFilter(button.dataset.filter));
   });
@@ -312,6 +293,7 @@
       inputText: "",
       transactions: [],
       subscriptions: [],
+      aiInsights: {},
       statusByKey: {},
       filter: "all",
       savingGoal: 0,
@@ -344,6 +326,7 @@
         inputText: state.inputText,
         transactions: state.transactions,
         subscriptions: state.subscriptions,
+        aiInsights: state.aiInsights,
         statusByKey: state.statusByKey,
         filter: state.filter,
         savingGoal: state.savingGoal,
@@ -355,7 +338,9 @@
     }, 1200);
   }
 
-  function analyzeInput() {
+  async function analyzeInput() {
+    if (elements.analyzeButton.disabled) return;
+
     const parsed = parseTransactions(elements.input.value);
     const manual = state.transactions.filter((transaction) => transaction.source === "manual");
 
@@ -365,9 +350,11 @@
       ...candidate,
       status: state.statusByKey[candidate.key] || "unknown",
     }));
+    state.aiInsights = {};
 
     saveState();
     render();
+    await requestBatchAiInsights(state.subscriptions);
   }
 
   function saveSavingGoal(event) {
@@ -424,6 +411,7 @@
     state.inputText = "";
     state.transactions = [];
     state.subscriptions = [];
+    state.aiInsights = {};
     state.statusByKey = {};
     state.filter = "all";
     elements.input.value = "";
@@ -464,6 +452,7 @@
       ...candidate,
       status: state.statusByKey[candidate.key] || "unknown",
     }));
+    state.aiInsights = {};
 
     elements.manualMerchant.value = "";
     elements.manualAmount.value = "";
@@ -556,6 +545,7 @@
     state.inputText = "";
     state.transactions = [];
     state.subscriptions = [];
+    state.aiInsights = {};
     state.statusByKey = {};
     state.filter = "all";
     state.savingGoal = 0;
@@ -1175,7 +1165,10 @@
       aiUsageState.count = 0;
     }
     elements.aiUsage.textContent = `AI 분석 ${aiUsageState.count}/${AI_DAILY_LIMIT}회`;
-    elements.aiUsage.title = `오늘 ${AI_DAILY_LIMIT}회까지 AI 설명을 요청할 수 있습니다.`;
+    elements.aiUsage.title = `오늘 ${AI_DAILY_LIMIT}회까지 전체 후보 AI 분석을 실행할 수 있습니다.`;
+    if (!elements.aiBatchStatus.textContent) {
+      elements.aiBatchStatus.textContent = "결제내역을 분석하면 전체 후보 설명이 여기에 표시됩니다.";
+    }
   }
 
   function renderFilterCounts() {
@@ -1343,7 +1336,6 @@
             <span class="detection-reason"></span>
           </div>
           <div class="subscription-actions">
-            <button class="ai-button" type="button" data-ai-key="${item.key}">AI 설명</button>
             <select class="status-select" aria-label="상태 선택">
               <option value="unknown">모름</option>
               <option value="keep">유지</option>
@@ -1359,93 +1351,94 @@
       const select = card.querySelector(".status-select");
       select.value = item.status;
       select.addEventListener("change", () => updateStatus(item.key, select.value));
+      const aiInsight = state.aiInsights[item.key];
+      if (aiInsight?.text) {
+        const insight = document.createElement("section");
+        insight.className = "ai-insight-block";
+        const heading = document.createElement("strong");
+        heading.textContent = aiInsight.source === "gemini" ? "Gemini AI 분석" : "기본 분석 결과";
+        const content = document.createElement("p");
+        content.textContent = aiInsight.text;
+        insight.append(heading, content);
+        card.append(insight);
+      }
       elements.subscriptionList.append(card);
     });
   }
 
-  function handleSubscriptionClick(event) {
-    const button = event.target.closest("[data-ai-key]");
-    if (!button) return;
+  async function requestBatchAiInsights(candidates) {
+    if (!candidates.length) {
+      elements.aiBatchStatus.textContent = "자동결제 후보가 없어 AI 분석을 실행하지 않았습니다.";
+      return;
+    }
 
-    const candidate = state.subscriptions.find((item) => item.key === button.dataset.aiKey);
-    if (candidate) requestAiInsight(candidate);
-  }
+    const localInsights = Object.fromEntries(candidates.map((candidate) => [candidate.key, {
+      text: buildLocalAiInsight(candidate),
+      source: "local",
+    }]));
 
-  async function requestAiInsight(candidate) {
-    activeAiCandidate = candidate;
-    elements.aiModalTitle.textContent = `${candidate.merchant} AI 설명`;
-    elements.aiModalStatus.textContent = "결제 요약값을 바탕으로 확인 포인트를 만드는 중...";
-    elements.aiModalContent.textContent = "잠시만 기다려주세요.";
-    elements.aiModalRetry.hidden = true;
-    elements.aiModal.hidden = false;
-    document.body.classList.add("modal-open");
-
-    const localInsight = buildLocalAiInsight(candidate);
     if (location.protocol === "file:") {
-      showAiFallback(localInsight, "로컬 파일에서는 AI 연결을 사용할 수 있어 자동 설명을 표시합니다.");
+      state.aiInsights = localInsights;
+      elements.aiBatchStatus.textContent = "AI 분석을 사용할 수 없어 기본 분석 결과를 표시합니다. 로컬 파일에서는 기본 분석을 사용합니다.";
+      saveState();
+      render();
       return;
     }
 
-    if (aiUsageState.count >= AI_DAILY_LIMIT) {
-      showAiFallback(localInsight, `오늘 AI 분석 한도(${AI_DAILY_LIMIT}회)를 모두 사용했습니다. 내일 다시 요청할 수 있습니다.`);
-      elements.aiModalRetry.hidden = true;
+    if (aiUsageState.count >= AI_DAILY_LIMIT || !consumeAiUsage()) {
+      state.aiInsights = localInsights;
+      elements.aiBatchStatus.textContent = `AI 분석을 사용할 수 없어 기본 분석 결과를 표시합니다. 오늘 한도(${AI_DAILY_LIMIT}회)를 모두 사용했습니다.`;
+      saveState();
+      render();
       return;
     }
 
-    if (!consumeAiUsage()) {
-      showAiFallback(localInsight, `오늘 AI 분석 한도(${AI_DAILY_LIMIT}회)를 모두 사용했습니다.`);
-      elements.aiModalRetry.hidden = true;
-      return;
-    }
+    elements.analyzeButton.disabled = true;
+    elements.analyzeButton.textContent = "AI 분석 중...";
+    elements.aiBatchStatus.textContent = "전체 자동결제 후보를 Gemini AI로 분석하는 중입니다...";
 
     try {
       const response = await fetch("/api/ai-insight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildAiPayload(candidate)),
+        body: JSON.stringify({ candidates: candidates.map(buildAiPayload) }),
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.insight) {
+      if (!response.ok || !Array.isArray(payload.insights) || payload.insights.length !== candidates.length) {
         throw new Error("AI 응답을 받을 수 없습니다.");
       }
 
-      elements.aiModalStatus.textContent = "AI가 결제 패턴을 검토했습니다. 원문은 전송하지 않았습니다.";
-      elements.aiModalContent.textContent = payload.insight;
-    } catch (error) {
-      showAiFallback(localInsight);
-      elements.aiModalRetry.hidden = false;
+      state.aiInsights = Object.fromEntries(candidates.map((candidate, index) => [candidate.key, {
+        text: payload.insights[index],
+        source: "gemini",
+      }]));
+      elements.aiBatchStatus.textContent = `Gemini AI가 ${candidates.length}개 후보를 한 번에 분석했습니다. 원문은 전송하지 않았습니다.`;
+    } catch {
+      state.aiInsights = localInsights;
+      elements.aiBatchStatus.textContent = "AI 분석을 사용할 수 없어 기본 분석 결과를 표시합니다.";
+    } finally {
+      saveState();
+      render();
+      elements.analyzeButton.disabled = false;
+      elements.analyzeButton.textContent = "분석";
     }
-  }
-
-  function showAiFallback(insight, detail = "") {
-    const fallbackMessage = "AI 분석을 사용할 수 없어 기본 분석 결과를 표시합니다.";
-    elements.aiModalStatus.textContent = detail ? `${fallbackMessage} ${detail}` : fallbackMessage;
-    elements.aiModalContent.textContent = insight;
-  }
-
-  function closeAiModal() {
-    elements.aiModal.hidden = true;
-    document.body.classList.remove("modal-open");
   }
 
   function buildAiPayload(candidate) {
     const ranked = rankCandidates(state.subscriptions);
     const rank = ranked.findIndex((item) => item.key === candidate.key);
     return {
+      key: candidate.key,
       merchant: candidate.merchant,
       canonicalMerchant: candidate.canonicalMerchant || candidate.key,
-      originalMerchants: candidate.originalMerchants || [candidate.merchant],
       category: candidate.category.label,
       currency: candidate.currency,
       averageAmount: Math.round(candidate.averageAmount * 100) / 100,
       monthlyKrw: Math.round(candidate.monthlyKrw),
       annualKrw: Math.round(annualEquivalent(candidate.monthlyKrw)),
       cadence: candidate.cadence,
-      nextDate: candidate.nextDate,
       occurrences: candidate.occurrences,
       confidence: candidate.confidence,
-      detectedDates: candidate.detectedDates,
-      cardProviders: candidate.cardProviders.map((item) => item.provider),
       status: candidate.status,
       priorityScore: candidate.priorityScore || calculatePriorityScore(candidate),
       priorityRank: rank >= 0 ? rank + 1 : null,
@@ -1476,6 +1469,7 @@
 
   function updateStatus(key, status) {
     state.statusByKey[key] = status;
+    delete state.aiInsights[key];
     state.subscriptions = state.subscriptions.map((item) =>
       item.key === key ? { ...item, status } : item,
     );
