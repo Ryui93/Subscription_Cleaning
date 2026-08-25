@@ -89,6 +89,7 @@ async function run() {
     const body = JSON.parse(options.body);
     assert.equal(body.generationConfig.responseMimeType, "application/json");
     assert.equal(body.generationConfig.responseSchema.type, "ARRAY");
+    assert.equal(body.generationConfig.thinkingConfig.thinkingLevel, "MINIMAL");
     assert.equal(body.contents[0].parts[0].text.includes("user@example.com"), false);
     assert.equal(body.contents[0].parts[0].text.includes("신한카드"), false);
     return {

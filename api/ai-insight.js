@@ -126,7 +126,8 @@ function buildGeminiRequest(candidates) {
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: { type: "ARRAY", items: itemSchema },
-      maxOutputTokens: 760,
+      maxOutputTokens: 1200,
+      thinkingConfig: { thinkingLevel: "MINIMAL" },
     },
   };
 }
