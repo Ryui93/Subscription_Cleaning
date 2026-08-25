@@ -956,7 +956,7 @@
       if (stored && stored.date === todayKey) {
         return { date: todayKey, count: Math.min(AI_DAILY_LIMIT, Math.max(0, Number(stored.count) || 0)) };
       }
-    } catch (error) {
+    } catch {
       // A malformed usage record should never block local analysis.
     }
     return { date: todayKey, count: 0 };
@@ -1406,19 +1406,20 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.insight) {
-        throw new Error(payload.error || "AI 응답을 받을 수 없습니다.");
+        throw new Error("AI 응답을 받을 수 없습니다.");
       }
 
       elements.aiModalStatus.textContent = "AI가 결제 패턴을 검토했습니다. 원문은 전송하지 않았습니다.";
       elements.aiModalContent.textContent = payload.insight;
     } catch (error) {
-      showAiFallback(localInsight, `AI 연결 전 자동 설명을 표시합니다. ${error.message}`);
+      showAiFallback(localInsight);
       elements.aiModalRetry.hidden = false;
     }
   }
 
-  function showAiFallback(insight, status) {
-    elements.aiModalStatus.textContent = status;
+  function showAiFallback(insight, detail = "") {
+    const fallbackMessage = "AI 분석을 사용할 수 없어 기본 분석 결과를 표시합니다.";
+    elements.aiModalStatus.textContent = detail ? `${fallbackMessage} ${detail}` : fallbackMessage;
     elements.aiModalContent.textContent = insight;
   }
 

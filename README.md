@@ -8,7 +8,7 @@
 
 - 1단계 MVP 완료
 - 기본 분석은 API 키 없이 동작
-- AI 설명은 `OPENAI_API_KEY` 설정 시 활성화
+- AI 설명은 `GEMINI_API_KEY` 설정 시 활성화
 - 로그인 없음
 - 서버 저장 없음
 - 외부 DB 없음
@@ -33,12 +33,19 @@ Vercel 서버 함수를 통해 AI에 전달합니다. AI는 통합된 결제처�
 - 카드번호·계좌번호·전화번호처럼 보이는 값은 AI 서버 전송 전에 제거
 - AI 설명은 금융 자문이나 해지 대행이 아닌 참고 정보
 
-Vercel 환경변수:
+실행 중 AI: Google Gemini API  
+개발 보조: ChatGPT/Codex  
+사용량 초과 및 API 오류 시 로컬 분석 fallback 제공
+
+Vercel Production 환경변수:
 
 ```text
-OPENAI_API_KEY=발급받은 서버용 키
-OPENAI_MODEL=gpt-5-mini
+GEMINI_API_KEY=발급받은 서버용 키
+GEMINI_MODEL=Gemini 3.6 Flash
 ```
+
+`GEMINI_API_KEY`는 브라우저나 저장소에 넣지 않고 Vercel 서버 함수에서만 읽습니다. `GEMINI_MODEL`은
+환경변수로 바꿀 수 있으며, 표시형 이름은 Gemini API 모델 ID로 정규화됩니다.
 
 ## 제품 방향
 
@@ -168,7 +175,7 @@ Vercel 배포와 공개 URL 확인까지 진행했습니다.
 
 ## 다음 우선순위
 
-1. Vercel에 `OPENAI_API_KEY`와 `OPENAI_MODEL` 환경변수 등록
+1. Vercel Production에 `GEMINI_API_KEY`와 필요 시 `GEMINI_MODEL` 환경변수 등록
 2. 실제 카드 알림 샘플 20~30개로 AI 설명과 파서 테스트 확장
 3. 원티드 제출 폼에 서비스 링크와 스크린샷 등록
 4. 제출 마감 전 배포 링크와 AI 설명 버튼 최종 확인

@@ -103,7 +103,7 @@
 
 필요 API 후보:
 
-- OpenAI API: 결제처 의미 분석, 카테고리 분류, 해지 방법 요약
+- Google Gemini API: 결제처 의미 분석, 카테고리 분류, 해지 방법 요약
 - OCR API: 카드 명세서 캡처/이미지에서 거래 내역 추출
 - Supabase/Firebase: 로그인, 사용자별 데이터 저장
 - 이메일/SMS/알림톡 API: 결제 전 리마인드
