@@ -1,7 +1,7 @@
 const MAX_MERCHANT_LENGTH = 120;
 const ALLOWED_CURRENCIES = new Set(["KRW", "USD", "JPY", "EUR"]);
 const DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
-const REQUEST_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 9000;
 const INSIGHT_FIELDS = [
   "merchantCategory",
   "candidateReason",
