@@ -264,7 +264,7 @@ h2 {
 
 .summary-stats {
   display: grid;
-  grid-template-columns: repeat(2, 92px);
+  grid-template-columns: repeat(3, 92px);
   gap: 8px;
   min-width: 0;
 }
@@ -287,6 +287,12 @@ h2 {
 
 .summary-stat.danger strong {
   color: #ffad9f;
+}
+
+.summary-stat.annual-stat strong {
+  color: var(--yellow);
+  font-size: 17px;
+  line-height: 1.15;
 }
 
 .save-state {
@@ -361,6 +367,18 @@ h2 {
   font-weight: 850;
   text-align: right;
   overflow-wrap: anywhere;
+}
+
+.goal-meter-values {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.goal-meter-values small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
 }
 
 .progress-track {
@@ -810,6 +828,71 @@ select:focus {
   border-style: dashed;
 }
 
+.priority-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(17, 128, 96, 0.22);
+  border-radius: 8px;
+  padding: 11px;
+  background: rgba(17, 128, 96, 0.06);
+}
+
+.priority-summary[hidden] {
+  display: none;
+}
+
+.priority-summary > strong {
+  color: var(--green-dark);
+  font-size: 14px;
+}
+
+.priority-summary > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.priority-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.priority-item {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 9px;
+  background: var(--surface-strong);
+}
+
+.priority-item.cancel {
+  border-color: rgba(224, 100, 79, 0.45);
+}
+
+.priority-item strong,
+.priority-item span,
+.priority-item small {
+  overflow-wrap: anywhere;
+}
+
+.priority-item strong {
+  font-size: 13px;
+}
+
+.priority-item span,
+.priority-item small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .segment {
   min-height: 38px;
   border: 0;
@@ -916,12 +999,24 @@ select:focus {
   background: var(--green);
 }
 
-.category-pill.media {
+.category-pill.ott {
   background: #6d5ca4;
 }
 
-.category-pill.software {
+.category-pill.ai {
+  background: #8d4f9e;
+}
+
+.category-pill.cloud {
   background: var(--blue);
+}
+
+.category-pill.music {
+  background: #b36a27;
+}
+
+.category-pill.game {
+  background: #2d7c8a;
 }
 
 .category-pill.finance {
@@ -934,7 +1029,7 @@ select:focus {
 
 .subscription-meta {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -1020,6 +1115,12 @@ select:focus {
 
 .ai-button:hover {
   background: rgba(109, 92, 164, 0.16);
+}
+
+.ai-usage {
+  border-color: rgba(109, 92, 164, 0.28) !important;
+  color: #5c4d8f !important;
+  background: rgba(109, 92, 164, 0.08) !important;
 }
 
 .ai-modal[hidden] {
@@ -1500,6 +1601,10 @@ body.modal-open {
   .card-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
+  }
+
+  .priority-list {
+    grid-template-columns: 1fr;
   }
 
   .status-row {

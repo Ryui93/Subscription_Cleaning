@@ -96,7 +96,7 @@ const transactions = context.window.SubscriptionCleaningParser.parseTransactions
 const candidates = context.window.SubscriptionCleaningParser.buildCandidates(transactions);
 
 const merchants = candidates.map((candidate) => candidate.merchant).sort();
-const required = ["ADOBE CREATIVE CLOUD", "APPLE.COM/BILL", "NETFLIX", "OPENAI *CHATGPT", "쿠팡와우"];
+const required = ["Adobe Creative Cloud", "Apple", "Netflix", "OpenAI ChatGPT", "쿠팡와우"];
 
 for (const merchant of required) {
   if (!merchants.includes(merchant)) {
@@ -134,9 +134,9 @@ if (cardGroups.at(-1).provider !== "카드 정보 없음") {
   throw new Error(`Expected unknown card group last, got ${cardGroups.at(-1).provider}`);
 }
 
-const netflix = candidates.find((candidate) => candidate.merchant === "NETFLIX");
-const adobe = candidates.find((candidate) => candidate.merchant === "ADOBE CREATIVE CLOUD");
-const apple = candidates.find((candidate) => candidate.merchant === "APPLE.COM/BILL");
+const netflix = candidates.find((candidate) => candidate.merchant === "Netflix");
+const adobe = candidates.find((candidate) => candidate.merchant === "Adobe Creative Cloud");
+const apple = candidates.find((candidate) => candidate.merchant === "Apple");
 
 if (!netflix || netflix.detectedDates.join(",") !== "2026-04-02,2026-05-02,2026-06-02") {
   throw new Error(`Expected Netflix detected dates, got ${netflix ? netflix.detectedDates : "none"}`);
@@ -148,6 +148,27 @@ if (!adobe || adobe.detectedDates.join(",") !== "2026-06-10") {
 
 if (!apple || apple.detectedDates.join(",") !== "2026-04-09,2026-05-09,2026-06-09") {
   throw new Error(`Expected Apple detected dates, got ${apple ? apple.detectedDates : "none"}`);
+}
+
+if (apple.category.id !== "cloud" || netflix.category.id !== "ott") {
+  throw new Error(`Expected automatic categories, got ${apple.category.id}/${netflix.category.id}`);
+}
+
+const aliasTransactions = context.window.SubscriptionCleaningParser.parseTransactions([
+  "07/09 애플 결제 14,900원",
+  "08/09 Apple 14,900원 승인",
+].join("\n"));
+const aliasCandidates = context.window.SubscriptionCleaningParser.buildCandidates(aliasTransactions);
+if (aliasCandidates.length !== 1 || aliasCandidates[0].merchant !== "Apple" || aliasCandidates[0].occurrences !== 2) {
+  throw new Error(`Expected Apple aliases to merge, got ${JSON.stringify(aliasCandidates)}`);
+}
+
+const ranked = context.window.SubscriptionCleaningParser.rankCandidates([
+  { merchant: "Netflix", monthlyKrw: 17000, occurrences: 3, confidence: 96, status: "unknown" },
+  { merchant: "Apple", monthlyKrw: 14900, occurrences: 3, confidence: 96, status: "cancel" },
+]);
+if (ranked[0].merchant !== "Apple" || ranked[0].priorityScore <= ranked[1].priorityScore) {
+  throw new Error(`Expected cancellation status to raise priority, got ${JSON.stringify(ranked)}`);
 }
 
 console.log(

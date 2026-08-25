@@ -17,11 +17,14 @@ function responseStub() {
 
 async function run() {
   const candidate = {
-    merchant: "NETFLIX",
-    category: "콘텐츠",
+    merchant: "Netflix",
+    canonicalMerchant: "netflix",
+    originalMerchants: ["NETFLIX", "넷플릭스"],
+    category: "OTT",
     currency: "KRW",
     averageAmount: 17000,
     monthlyKrw: 17000,
+    annualKrw: 204000,
     cadence: "월간",
     nextDate: "2026-07-02",
     occurrences: 3,
@@ -29,11 +32,16 @@ async function run() {
     detectedDates: ["2026-04-02", "2026-05-02", "2026-06-02"],
     cardProviders: ["신한카드"],
     status: "unknown",
+    priorityScore: 59,
+    priorityRank: 1,
   };
 
-  assert.equal(handler.normalizeCandidate(candidate).merchant, "NETFLIX");
+  assert.equal(handler.normalizeCandidate(candidate).merchant, "Netflix");
   assert.equal(handler.normalizeCandidate({ merchant: "", currency: "KRW", occurrences: 1, confidence: 50 }), null);
   assert.match(handler.buildInput(candidate), /결제 원문은 전달되지 않았고/);
+  assert.match(handler.buildInput(candidate), /canonicalMerchant와 merchant는 브라우저 규칙이 통합한 표시명/);
+  assert.match(handler.buildInput(candidate), /자동결제 후보 설명, 해지 우선순위, 절약액, 다음 행동/);
+  assert.doesNotMatch(handler.buildInput({ ...candidate, merchant: "010-1234-5678 카드번호 1234 5678 1234 5678" }), /010-1234/);
 
   const oldKey = process.env.OPENAI_API_KEY;
   const oldFetch = global.fetch;
@@ -41,7 +49,8 @@ async function run() {
   global.fetch = async (_url, options) => {
     const body = JSON.parse(options.body);
     assert.equal(body.store, false);
-    assert.equal(body.input.includes("NETFLIX"), true);
+    assert.equal(body.input.includes("Netflix"), true);
+    assert.equal(body.input.includes('"raw"'), false);
     return {
       ok: true,
       async json() {

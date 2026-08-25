@@ -2,24 +2,41 @@
   const STORAGE_KEY = "subscription-cleaning:v1";
   const FEEDBACK_KEY = "subscription-cleaning:feedback:v1";
   const THEME_KEY = "subscription-cleaning:theme";
+  const AI_USAGE_KEY = "subscription-cleaning:ai-usage:v1";
+  const AI_DAILY_LIMIT = 5;
   const today = new Date();
   let deferredInstallPrompt = null;
 
   const categoryRules = [
     {
-      id: "media",
-      label: "콘텐츠",
-      words: ["NETFLIX", "YOUTUBE", "DISNEY", "TVING", "WAVVE", "WATCHA", "SPOTIFY", "멜론", "지니"],
-    },
-    {
-      id: "software",
-      label: "소프트웨어",
-      words: ["OPENAI", "CHATGPT", "ANTHROPIC", "CLAUDE", "ADOBE", "NOTION", "GOOGLE", "MICROSOFT", "APPLE.COM"],
+      id: "ott",
+      label: "OTT",
+      words: ["NETFLIX", "넷플릭스", "YOUTUBE", "유튜브", "DISNEY", "디즈니", "TVING", "티빙", "WAVVE", "웨이브", "WATCHA", "왓챠"],
     },
     {
       id: "shopping",
-      label: "멤버십",
-      words: ["쿠팡", "COUPANG", "와우", "NAVER", "네이버", "컬리", "마켓컬리"],
+      label: "쇼핑",
+      words: ["쿠팡", "COUPANG", "와우", "NAVER", "네이버", "컬리", "마켓컬리", "11번가", "G마켓", "옥션"],
+    },
+    {
+      id: "ai",
+      label: "AI 도구",
+      words: ["OPENAI", "CHATGPT", "ANTHROPIC", "CLAUDE", "PERPLEXITY", "MIDJOURNEY", "RUNWAY", "ELEVENLABS"],
+    },
+    {
+      id: "cloud",
+      label: "클라우드/앱",
+      words: ["APPLE", "APPLE.COM", "애플", "ICLOUD", "GOOGLE ONE", "GOOGLE STORAGE", "MICROSOFT", "OFFICE", "ADOBE", "NOTION", "DROPBOX", "FIGMA", "CANVA"],
+    },
+    {
+      id: "music",
+      label: "음악",
+      words: ["SPOTIFY", "스포티파이", "멜론", "MELON", "지니", "GENIE", "APPLE MUSIC", "유튜브 뮤직"],
+    },
+    {
+      id: "game",
+      label: "게임",
+      words: ["STEAM", "스팀", "PLAYSTATION", "PLAYSTATION NETWORK", "XBOX", "NINTENDO", "넥슨", "NEXON", "RIOT", "로스트아크"],
     },
     {
       id: "finance",
@@ -31,6 +48,29 @@
       label: "생활",
       words: ["헬스", "필라테스", "요가", "정수기", "렌탈", "통신", "SKT", "KT", "LGU"],
     },
+  ];
+
+  const merchantAliases = [
+    { key: "apple", display: "Apple", aliases: ["APPLE.COM/BILL", "APPLE.COM/BILLING", "APPLE 결제", "애플 결제", "애플", "ITUNES.COM/BILL"] },
+    { key: "netflix", display: "Netflix", aliases: ["NETFLIX", "넷플릭스"] },
+    { key: "coupang-wow", display: "쿠팡와우", aliases: ["쿠팡와우", "COUPANG WOW", "COUPANGWOW", "쿠팡 WOW"] },
+    { key: "youtube-premium", display: "YouTube Premium", aliases: ["YOUTUBE PREMIUM", "유튜브 프리미엄", "유튜브Premium"] },
+    { key: "disney-plus", display: "Disney+", aliases: ["DISNEY+", "DISNEY PLUS", "디즈니플러스", "디즈니+"] },
+    { key: "tving", display: "티빙", aliases: ["TVING", "티빙"] },
+    { key: "wavve", display: "웨이브", aliases: ["WAVVE", "웨이브"] },
+    { key: "watcha", display: "왓챠", aliases: ["WATCHA", "왓챠"] },
+    { key: "spotify", display: "Spotify", aliases: ["SPOTIFY", "스포티파이"] },
+    { key: "melon", display: "멜론", aliases: ["MELON", "멜론"] },
+    { key: "openai-chatgpt", display: "OpenAI ChatGPT", aliases: ["OPENAI *CHATGPT", "OPENAI CHATGPT", "CHATGPT", "챗GPT", "챗지피티"] },
+    { key: "claude", display: "Claude", aliases: ["ANTHROPIC", "CLAUDE", "클로드"] },
+    { key: "adobe", display: "Adobe Creative Cloud", aliases: ["ADOBE CREATIVE CLOUD", "ADOBE", "어도비"] },
+    { key: "notion", display: "Notion", aliases: ["NOTION", "노션"] },
+    { key: "google-one", display: "Google One", aliases: ["GOOGLE ONE", "GOOGLE STORAGE", "구글 원"] },
+    { key: "microsoft-365", display: "Microsoft 365", aliases: ["MICROSOFT 365", "OFFICE 365", "MICROSOFT"] },
+    { key: "icloud", display: "iCloud", aliases: ["ICLOUD", "아이클라우드"] },
+    { key: "dropbox", display: "Dropbox", aliases: ["DROPBOX"] },
+    { key: "steam", display: "Steam", aliases: ["STEAM", "스팀"] },
+    { key: "nintendo", display: "Nintendo", aliases: ["NINTENDO", "닌텐도"] },
   ];
 
   const cardProviderWords = [
@@ -83,7 +123,10 @@
   const UNKNOWN_PROVIDER = "카드 정보 없음";
   const cardProviderPattern = new RegExp(cardProviderWords.sort((a, b) => b.length - a.length).map(escapeRegex).join("|"), "gi");
   const noiseWordPattern = new RegExp(noiseWords.sort((a, b) => b.length - a.length).map(escapeRegex).join("|"), "gi");
-  const subscriptionKeywords = categoryRules.flatMap((rule) => rule.words).map((word) => word.toUpperCase());
+  const subscriptionKeywords = [
+    ...categoryRules.flatMap((rule) => rule.words),
+    ...merchantAliases.flatMap((entry) => entry.aliases),
+  ].map((word) => word.toUpperCase());
   const filterLabels = {
     all: "전체",
     keep: "유지",
@@ -94,6 +137,7 @@
   const feedbackState = {
     entries: loadFeedback(),
   };
+  const aiUsageState = loadAiUsage();
 
   const elements = {
     input: document.querySelector("#paymentInput"),
@@ -116,10 +160,14 @@
     cancelFocusButton: document.querySelector("#cancelFocusButton"),
     reportArea: document.querySelector("#reportArea"),
     monthlyTotal: document.querySelector("#monthlyTotal"),
+    annualTotal: document.querySelector("#annualTotal"),
     candidateCount: document.querySelector("#candidateCount"),
     cancelCount: document.querySelector("#cancelCount"),
+    aiUsage: document.querySelector("#aiUsage"),
+    goalSavedAnnual: document.querySelector("#goalSavedAnnual"),
     cardSummary: document.querySelector("#cardSummary"),
     cancelSummary: document.querySelector("#cancelSummary"),
+    prioritySummary: document.querySelector("#prioritySummary"),
     subscriptionList: document.querySelector("#subscriptionList"),
     transactionList: document.querySelector("#transactionList"),
     transactionCount: document.querySelector("#transactionCount"),
@@ -841,7 +889,7 @@
     const groups = new Map();
 
     transactions.forEach((transaction) => {
-      const key = normalizeMerchant(transaction.merchant);
+      const key = canonicalizeMerchant(transaction.merchant);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(transaction);
     });
@@ -856,7 +904,9 @@
     const sorted = [...items].sort((a, b) => a.date.localeCompare(b.date));
     const occurrences = sorted.length;
     const representative = pickRepresentative(sorted);
-    const category = detectCategory(representative);
+    const merchantAlias = resolveMerchant(representative);
+    const merchant = merchantAlias ? merchantAlias.display : representative;
+    const category = detectCategory(merchant);
     const currency = sorted[0].currency;
     const averageAmount = average(sorted.map((item) => item.amount));
     const intervals = getIntervals(sorted);
@@ -880,7 +930,9 @@
 
     return {
       key,
-      merchant: representative,
+      canonicalMerchant: merchantAlias ? merchantAlias.key : key,
+      merchant,
+      originalMerchants: [...new Set(sorted.map((item) => item.merchant))],
       category,
       cardProviders: summarizeProviders(sorted),
       occurrences,
@@ -890,17 +942,74 @@
       nextDate,
       confidence: Math.min(confidence, 96),
       monthlyKrw: currency === "KRW" ? monthlyEquivalent(averageAmount, cadence) : 0,
+      annualKrw: currency === "KRW" ? monthlyEquivalent(averageAmount, cadence) * 12 : 0,
       sampleRaw: sorted.at(-1).raw,
       detectedDates: sorted.map((item) => item.date),
       status: "unknown",
     };
   }
 
+  function loadAiUsage() {
+    const todayKey = getTodayKey();
+    try {
+      const stored = JSON.parse(localStorage.getItem(AI_USAGE_KEY) || "null");
+      if (stored && stored.date === todayKey) {
+        return { date: todayKey, count: Math.min(AI_DAILY_LIMIT, Math.max(0, Number(stored.count) || 0)) };
+      }
+    } catch (error) {
+      // A malformed usage record should never block local analysis.
+    }
+    return { date: todayKey, count: 0 };
+  }
+
+  function getTodayKey() {
+    const date = new Date();
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  function saveAiUsage() {
+    localStorage.setItem(AI_USAGE_KEY, JSON.stringify(aiUsageState));
+  }
+
+  function consumeAiUsage() {
+    const todayKey = getTodayKey();
+    if (aiUsageState.date !== todayKey) {
+      aiUsageState.date = todayKey;
+      aiUsageState.count = 0;
+    }
+    if (aiUsageState.count >= AI_DAILY_LIMIT) return false;
+    aiUsageState.count += 1;
+    saveAiUsage();
+    renderAiUsage();
+    return true;
+  }
+
   function normalizeMerchant(merchant) {
-    return merchant
+    return canonicalizeMerchant(merchant);
+  }
+
+  function normalizeMerchantText(merchant) {
+    return String(merchant || "")
       .toUpperCase()
       .replace(/주식회사|유한회사|\(주\)|CO\.?\,? LTD\.?/gi, "")
       .replace(/[^A-Z0-9가-힣]/g, "");
+  }
+
+  function resolveMerchant(merchant) {
+    const normalized = normalizeMerchantText(merchant);
+    if (!normalized) return null;
+
+    return merchantAliases.find((entry) =>
+      entry.aliases.some((alias) => {
+        const aliasText = normalizeMerchantText(alias);
+        return aliasText && (normalized.includes(aliasText) || aliasText.includes(normalized));
+      }),
+    ) || null;
+  }
+
+  function canonicalizeMerchant(merchant) {
+    const alias = resolveMerchant(merchant);
+    return alias ? alias.key : normalizeMerchantText(merchant);
   }
 
   function detectCategory(merchant) {
@@ -964,6 +1073,10 @@
     return amount;
   }
 
+  function annualEquivalent(monthlyKrw) {
+    return monthlyKrw > 0 ? monthlyKrw * 12 : 0;
+  }
+
   function isAmountStable(items) {
     if (items.length < 2) return false;
     const amounts = items.map((item) => item.amount);
@@ -993,6 +1106,7 @@
     renderFilterCounts();
     renderGoal();
     renderCancelSummary();
+    renderPrioritySummary();
     renderSubscriptions();
   }
 
@@ -1000,8 +1114,10 @@
     renderFilterCounts();
     renderSummary();
     renderGoal();
+    renderAiUsage();
     renderCardSummary();
     renderCancelSummary();
+    renderPrioritySummary();
     renderSubscriptions();
     renderTransactions();
     renderFeedback();
@@ -1012,6 +1128,7 @@
     const cancelCount = state.subscriptions.filter((item) => item.status === "cancel").length;
 
     elements.monthlyTotal.textContent = formatAmount(Math.round(monthlyTotal), "KRW");
+    elements.annualTotal.textContent = formatAmount(Math.round(annualEquivalent(monthlyTotal)), "KRW");
     elements.candidateCount.textContent = `${state.subscriptions.length}개`;
     elements.cancelCount.textContent = `${cancelCount}개`;
   }
@@ -1024,6 +1141,7 @@
 
     elements.goalInput.value = goal ? Math.round(goal).toLocaleString("ko-KR") : "";
     elements.goalSavedAmount.textContent = formatAmount(Math.round(cancelSavings), "KRW");
+    elements.goalSavedAnnual.textContent = `연간 ${formatAmount(Math.round(annualEquivalent(cancelSavings)), "KRW")}`;
     elements.goalProgressBar.style.width = `${progress}%`;
     elements.cancelFocusButton.textContent =
       cancelSavings > 0 && state.filter !== "cancel"
@@ -1048,6 +1166,16 @@
     return state.subscriptions
       .filter((item) => item.status === "cancel")
       .reduce((sum, item) => sum + item.monthlyKrw, 0);
+  }
+
+  function renderAiUsage() {
+    const todayKey = getTodayKey();
+    if (aiUsageState.date !== todayKey) {
+      aiUsageState.date = todayKey;
+      aiUsageState.count = 0;
+    }
+    elements.aiUsage.textContent = `AI 분석 ${aiUsageState.count}/${AI_DAILY_LIMIT}회`;
+    elements.aiUsage.title = `오늘 ${AI_DAILY_LIMIT}회까지 AI 설명을 요청할 수 있습니다.`;
   }
 
   function renderFilterCounts() {
@@ -1089,7 +1217,7 @@
       title.textContent = "해지예정으로 표시한 항목이 없습니다.";
       description.textContent = "정리할 구독을 해지예정으로 바꾸면 예상 절약액이 표시됩니다.";
     } else {
-      title.textContent = `해지예정 ${cancelItems.length}개 · 예상 절약액 ${formatAmount(Math.round(cancelSavings), "KRW")}`;
+      title.textContent = `해지예정 ${cancelItems.length}개 · 월 ${formatAmount(Math.round(cancelSavings), "KRW")} · 연 ${formatAmount(Math.round(annualEquivalent(cancelSavings)), "KRW")}`;
       const visible = cancelItems
         .filter((item) => item.monthlyKrw > 0)
         .slice(0, 3)
@@ -1099,6 +1227,62 @@
     }
 
     elements.cancelSummary.append(title, description);
+  }
+
+  function renderPrioritySummary() {
+    elements.prioritySummary.replaceChildren();
+    if (!state.subscriptions.length) {
+      elements.prioritySummary.hidden = true;
+      return;
+    }
+
+    const heading = document.createElement("strong");
+    heading.textContent = "해지 우선순위 추천";
+    const description = document.createElement("span");
+    description.textContent = "상태 선택, 월 부담, 반복 횟수와 신뢰도를 반영한 참고 순위입니다.";
+    const list = document.createElement("div");
+    list.className = "priority-list";
+
+    rankCandidates(state.subscriptions).slice(0, 3).forEach((candidate, index) => {
+      const item = document.createElement("article");
+      item.className = `priority-item ${candidate.status}`;
+      const title = document.createElement("strong");
+      title.textContent = `${index + 1}. ${candidate.merchant}`;
+      const meta = document.createElement("span");
+      meta.textContent = `${statusLabel(candidate.status)} · 월 ${formatAmount(Math.round(candidate.monthlyKrw), "KRW")} · 점수 ${candidate.priorityScore}`;
+      const reason = document.createElement("small");
+      reason.textContent = getPriorityReason(candidate);
+      item.append(title, meta, reason);
+      list.append(item);
+    });
+
+    elements.prioritySummary.hidden = false;
+    elements.prioritySummary.append(heading, description, list);
+  }
+
+  function statusLabel(status) {
+    return filterLabels[status] || filterLabels.unknown;
+  }
+
+  function calculatePriorityScore(candidate) {
+    const statusScore = candidate.status === "cancel" ? 50 : candidate.status === "unknown" ? 25 : 0;
+    const monthlyScore = Math.min(40, Math.round(Math.max(0, candidate.monthlyKrw || 0) / 1000));
+    const repeatScore = Math.min(18, Math.max(0, Number(candidate.occurrences) || 0) * 4);
+    const confidenceScore = Math.round(Math.min(100, Math.max(0, Number(candidate.confidence) || 0)) * 0.15);
+    return statusScore + monthlyScore + repeatScore + confidenceScore;
+  }
+
+  function rankCandidates(candidates) {
+    return [...candidates]
+      .map((candidate) => ({ ...candidate, priorityScore: calculatePriorityScore(candidate) }))
+      .sort((a, b) => b.priorityScore - a.priorityScore || b.monthlyKrw - a.monthlyKrw || a.merchant.localeCompare(b.merchant, "ko"));
+  }
+
+  function getPriorityReason(candidate) {
+    if (candidate.status === "cancel") return "해지예정으로 표시되어 먼저 확인할 항목입니다.";
+    if (candidate.status === "keep") return "유지로 표시되어 우선순위를 낮췄습니다.";
+    if (candidate.monthlyKrw >= 20000) return "월 부담이 큰 편이라 이용 여부를 먼저 확인해보세요.";
+    return "아직 모름 상태라 반복 결제 여부와 실제 이용 여부를 확인해보세요.";
   }
 
   function parseGoalAmount(value) {
@@ -1151,6 +1335,7 @@
           <div class="meta-box"><span>주기</span><strong>${item.cadence}</strong></div>
           <div class="meta-box"><span>다음 예상</span><strong>${formatDate(item.nextDate)}</strong></div>
           <div class="meta-box"><span>반복</span><strong>${item.occurrences}회</strong></div>
+          <div class="meta-box"><span>연 예상</span><strong>${item.monthlyKrw ? formatAmount(Math.round(item.annualKrw || annualEquivalent(item.monthlyKrw)), "KRW") : "환산 필요"}</strong></div>
         </div>
         <div class="status-row">
           <div class="status-copy">
@@ -1201,6 +1386,18 @@
       return;
     }
 
+    if (aiUsageState.count >= AI_DAILY_LIMIT) {
+      showAiFallback(localInsight, `오늘 AI 분석 한도(${AI_DAILY_LIMIT}회)를 모두 사용했습니다. 내일 다시 요청할 수 있습니다.`);
+      elements.aiModalRetry.hidden = true;
+      return;
+    }
+
+    if (!consumeAiUsage()) {
+      showAiFallback(localInsight, `오늘 AI 분석 한도(${AI_DAILY_LIMIT}회)를 모두 사용했습니다.`);
+      elements.aiModalRetry.hidden = true;
+      return;
+    }
+
     try {
       const response = await fetch("/api/ai-insight", {
         method: "POST",
@@ -1231,12 +1428,17 @@
   }
 
   function buildAiPayload(candidate) {
+    const ranked = rankCandidates(state.subscriptions);
+    const rank = ranked.findIndex((item) => item.key === candidate.key);
     return {
       merchant: candidate.merchant,
+      canonicalMerchant: candidate.canonicalMerchant || candidate.key,
+      originalMerchants: candidate.originalMerchants || [candidate.merchant],
       category: candidate.category.label,
       currency: candidate.currency,
       averageAmount: Math.round(candidate.averageAmount * 100) / 100,
       monthlyKrw: Math.round(candidate.monthlyKrw),
+      annualKrw: Math.round(annualEquivalent(candidate.monthlyKrw)),
       cadence: candidate.cadence,
       nextDate: candidate.nextDate,
       occurrences: candidate.occurrences,
@@ -1244,6 +1446,8 @@
       detectedDates: candidate.detectedDates,
       cardProviders: candidate.cardProviders.map((item) => item.provider),
       status: candidate.status,
+      priorityScore: candidate.priorityScore || calculatePriorityScore(candidate),
+      priorityRank: rank >= 0 ? rank + 1 : null,
     };
   }
 
@@ -1252,11 +1456,18 @@
     const amountText = candidate.monthlyKrw
       ? `월 환산 약 ${formatAmount(Math.round(candidate.monthlyKrw), "KRW")}`
       : `${formatAmount(candidate.averageAmount, candidate.currency)} 기준`;
+    const annualText = candidate.monthlyKrw
+      ? `1년 예상 ${formatAmount(Math.round(annualEquivalent(candidate.monthlyKrw)), "KRW")}`
+      : "연간 환산은 통화 확인이 필요합니다";
     const nextText = candidate.nextDate ? `${formatDate(candidate.nextDate)} 전후` : "다음 결제일 전";
+    const mergedText = candidate.originalMerchants && candidate.originalMerchants.length > 1
+      ? `표현 ${candidate.originalMerchants.join(", ")}를 ${candidate.merchant}로 통합해 `
+      : "";
 
     return [
-      `판단: ${candidate.merchant}는 ${repeatText} ${candidate.cadence} 결제 후보로 보입니다.`,
-      `영향: ${amountText}가 반복 지출에 포함될 수 있습니다. 신뢰도는 ${candidate.confidence}%입니다.`,
+      `판단: ${mergedText}${repeatText} ${candidate.cadence} 결제 후보로 보입니다. 분류는 ${candidate.category.label}입니다.`,
+      `영향: ${amountText}, ${annualText}가 반복 지출에 포함될 수 있습니다. 신뢰도는 ${candidate.confidence}%입니다.`,
+      `우선순위: ${statusLabel(candidate.status)} 상태와 월 부담을 반영한 참고 점수는 ${calculatePriorityScore(candidate)}점입니다.`,
       `다음 행동: ${nextText}에 실제 이용 여부와 해지 조건을 확인하고, 필요하면 상태를 해지예정으로 표시하세요.`,
       "주의: 이 설명은 결제 패턴을 정리한 참고 정보이며 카드사 조회나 해지 대행이 아닙니다.",
     ].join("\n\n");
@@ -1272,6 +1483,7 @@
     renderGoal();
     renderFilterCounts();
     renderCancelSummary();
+    renderPrioritySummary();
     renderSubscriptions();
   }
 
@@ -1359,14 +1571,14 @@
     const dateText = visibleDates.length
       ? `${visibleDates.join(" / ")}${extraCount ? ` 외 ${extraCount}건` : ""}`
       : "날짜 정보 없음";
+    const mergedText = candidate.originalMerchants && candidate.originalMerchants.length > 1
+      ? `${candidate.originalMerchants.join(", ")}를 ${candidate.merchant}로 통합 · `
+      : "";
+    const patternText = candidate.occurrences >= 2
+      ? `${candidate.cadence} 주기로 ${candidate.occurrences}회 반복되어 자동결제 후보로 분류했습니다`
+      : "반복 내역이 부족해 자동결제 여부 확인이 필요합니다";
 
-    if (dates.length >= 3) {
-      return `최근 ${dates.length}개월 반복 결제 감지 · ${dateText}`;
-    }
-    if (dates.length === 2) {
-      return `반복 결제 가능성 감지 · ${dateText}`;
-    }
-    return `반복 내역이 부족해 확인이 필요합니다. · ${dateText}`;
+    return `${mergedText}${patternText} · ${dateText}`;
   }
 
   function getCandidateDates(candidate) {
@@ -1476,5 +1688,6 @@
     buildCandidates,
     summarizeCardGroups,
     buildAiPayload,
+    rankCandidates,
   };
 })();
