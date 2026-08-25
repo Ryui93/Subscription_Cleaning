@@ -12,4 +12,8 @@ Thumbs.db
 .vercel/
 .netlify/
 
+presentation-build/
+artifacts-ai-*.png
+deliverables/*.inspect.ndjson
+
 .vercel

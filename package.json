@@ -4,8 +4,8 @@
   "private": true,
   "description": "구독청소 정적 PWA MVP",
   "scripts": {
-    "check": "node --check app.js && node --check tests/parser-smoke.js && node --check sw.js",
-    "test": "node tests/parser-smoke.js",
+    "check": "node --check app.js && node --check api/ai-insight.js && node --check tests/parser-smoke.js && node --check tests/ai-insight-smoke.js && node --check sw.js",
+    "test": "node tests/parser-smoke.js && node tests/ai-insight-smoke.js",
     "serve": "python -m http.server 5173"
   }
 }

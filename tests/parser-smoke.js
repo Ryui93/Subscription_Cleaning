@@ -60,6 +60,7 @@ const context = {
     querySelectorAll() {
       return [];
     },
+    addEventListener() {},
   },
 };
 

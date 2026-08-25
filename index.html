@@ -139,8 +139,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <strong>처음 사용한다면</strong>
             <p>
               카드 승인 문자, 카드앱 결제 알림, 통장 거래내역을 붙여넣으면 반복되는 자동결제
-              후보를 찾아드립니다. 구독청소는 결제 알림을 직접 보내거나 받지 않습니다. 입력한
-              내용은 <b>서버로 전송되지 않고</b> 현재 브라우저에만 저장됩니다.
+              후보를 찾아드립니다. 기본 분석은 브라우저에서 진행되며, 카드별 <b>AI 설명</b>을
+              요청할 때도 원문이 아닌 결제 요약값만 전송됩니다.
             </p>
           </div>
 
@@ -195,7 +195,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="helper-box confidence-helper">
             <p>
               신뢰도는 같은 결제처가 비슷한 주기로 반복된 정도입니다. 100%가 아니어도 실제
-              구독일 수 있습니다.
+              구독일 수 있습니다. 각 후보의 AI 설명에서 확인할 이유와 다음 행동을 함께 볼 수
+              있습니다.
             </p>
           </div>
 
@@ -310,6 +311,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span>결제내역을 붙여넣으면 목록이 채워집니다.</span>
       </div>
     </template>
+
+    <div class="ai-modal" id="aiModal" hidden>
+      <div class="ai-modal-backdrop" data-ai-close></div>
+      <section class="ai-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
+        <div class="ai-modal-header">
+          <div>
+            <p class="panel-kicker">AI 검토</p>
+            <h2 id="aiModalTitle">구독 후보 설명</h2>
+          </div>
+          <button class="icon-button" id="aiModalClose" type="button" title="닫기" aria-label="AI 설명 닫기">×</button>
+        </div>
+        <p class="ai-modal-status" id="aiModalStatus">분석 중...</p>
+        <pre class="ai-modal-content" id="aiModalContent"></pre>
+        <div class="ai-modal-actions">
+          <button class="secondary-button compact" id="aiModalRetry" type="button">다시 요청</button>
+          <button class="primary-button compact" id="aiModalDone" type="button">확인</button>
+        </div>
+      </section>
+    </div>
 
     <script src="app.js"></script>
   </body>

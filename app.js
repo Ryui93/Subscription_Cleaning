@@ -135,7 +135,16 @@
     clearAllDataButton: document.querySelector("#clearAllDataButton"),
     saveState: document.querySelector("#saveState"),
     emptyTemplate: document.querySelector("#emptyTemplate"),
+    aiModal: document.querySelector("#aiModal"),
+    aiModalTitle: document.querySelector("#aiModalTitle"),
+    aiModalStatus: document.querySelector("#aiModalStatus"),
+    aiModalContent: document.querySelector("#aiModalContent"),
+    aiModalClose: document.querySelector("#aiModalClose"),
+    aiModalRetry: document.querySelector("#aiModalRetry"),
+    aiModalDone: document.querySelector("#aiModalDone"),
   };
+
+  let activeAiCandidate = null;
 
   elements.input.value = state.inputText;
   elements.manualDate.valueAsDate = today;
@@ -155,6 +164,18 @@
   elements.clearFeedbackButton.addEventListener("click", clearFeedback);
   elements.exportDataButton.addEventListener("click", exportLocalData);
   elements.clearAllDataButton.addEventListener("click", clearAllLocalData);
+  elements.subscriptionList.addEventListener("click", handleSubscriptionClick);
+  elements.aiModalClose.addEventListener("click", closeAiModal);
+  elements.aiModalDone.addEventListener("click", closeAiModal);
+  elements.aiModalRetry.addEventListener("click", () => {
+    if (activeAiCandidate) requestAiInsight(activeAiCandidate);
+  });
+  elements.aiModal.addEventListener("click", (event) => {
+    if (event.target.matches("[data-ai-close]")) closeAiModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !elements.aiModal.hidden) closeAiModal();
+  });
   document.querySelectorAll(".segment").forEach((button) => {
     button.addEventListener("click", () => setFilter(button.dataset.filter));
   });
@@ -1136,11 +1157,14 @@
             <span class="confidence">신뢰도 ${item.confidence}% · ${formatProviders(item.cardProviders)}</span>
             <span class="detection-reason"></span>
           </div>
-          <select class="status-select" aria-label="상태 선택">
-            <option value="unknown">모름</option>
-            <option value="keep">유지</option>
-            <option value="cancel">해지예정</option>
-          </select>
+          <div class="subscription-actions">
+            <button class="ai-button" type="button" data-ai-key="${item.key}">AI 설명</button>
+            <select class="status-select" aria-label="상태 선택">
+              <option value="unknown">모름</option>
+              <option value="keep">유지</option>
+              <option value="cancel">해지예정</option>
+            </select>
+          </div>
         </div>
       `;
 
@@ -1152,6 +1176,90 @@
       select.addEventListener("change", () => updateStatus(item.key, select.value));
       elements.subscriptionList.append(card);
     });
+  }
+
+  function handleSubscriptionClick(event) {
+    const button = event.target.closest("[data-ai-key]");
+    if (!button) return;
+
+    const candidate = state.subscriptions.find((item) => item.key === button.dataset.aiKey);
+    if (candidate) requestAiInsight(candidate);
+  }
+
+  async function requestAiInsight(candidate) {
+    activeAiCandidate = candidate;
+    elements.aiModalTitle.textContent = `${candidate.merchant} AI 설명`;
+    elements.aiModalStatus.textContent = "결제 요약값을 바탕으로 확인 포인트를 만드는 중...";
+    elements.aiModalContent.textContent = "잠시만 기다려주세요.";
+    elements.aiModalRetry.hidden = true;
+    elements.aiModal.hidden = false;
+    document.body.classList.add("modal-open");
+
+    const localInsight = buildLocalAiInsight(candidate);
+    if (location.protocol === "file:") {
+      showAiFallback(localInsight, "로컬 파일에서는 AI 연결을 사용할 수 있어 자동 설명을 표시합니다.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/ai-insight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildAiPayload(candidate)),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.insight) {
+        throw new Error(payload.error || "AI 응답을 받을 수 없습니다.");
+      }
+
+      elements.aiModalStatus.textContent = "AI가 결제 패턴을 검토했습니다. 원문은 전송하지 않았습니다.";
+      elements.aiModalContent.textContent = payload.insight;
+    } catch (error) {
+      showAiFallback(localInsight, `AI 연결 전 자동 설명을 표시합니다. ${error.message}`);
+      elements.aiModalRetry.hidden = false;
+    }
+  }
+
+  function showAiFallback(insight, status) {
+    elements.aiModalStatus.textContent = status;
+    elements.aiModalContent.textContent = insight;
+  }
+
+  function closeAiModal() {
+    elements.aiModal.hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+
+  function buildAiPayload(candidate) {
+    return {
+      merchant: candidate.merchant,
+      category: candidate.category.label,
+      currency: candidate.currency,
+      averageAmount: Math.round(candidate.averageAmount * 100) / 100,
+      monthlyKrw: Math.round(candidate.monthlyKrw),
+      cadence: candidate.cadence,
+      nextDate: candidate.nextDate,
+      occurrences: candidate.occurrences,
+      confidence: candidate.confidence,
+      detectedDates: candidate.detectedDates,
+      cardProviders: candidate.cardProviders.map((item) => item.provider),
+      status: candidate.status,
+    };
+  }
+
+  function buildLocalAiInsight(candidate) {
+    const repeatText = candidate.occurrences >= 3 ? "최근 3회 이상 반복되어" : "반복 흔적이 있어";
+    const amountText = candidate.monthlyKrw
+      ? `월 환산 약 ${formatAmount(Math.round(candidate.monthlyKrw), "KRW")}`
+      : `${formatAmount(candidate.averageAmount, candidate.currency)} 기준`;
+    const nextText = candidate.nextDate ? `${formatDate(candidate.nextDate)} 전후` : "다음 결제일 전";
+
+    return [
+      `판단: ${candidate.merchant}는 ${repeatText} ${candidate.cadence} 결제 후보로 보입니다.`,
+      `영향: ${amountText}가 반복 지출에 포함될 수 있습니다. 신뢰도는 ${candidate.confidence}%입니다.`,
+      `다음 행동: ${nextText}에 실제 이용 여부와 해지 조건을 확인하고, 필요하면 상태를 해지예정으로 표시하세요.`,
+      "주의: 이 설명은 결제 패턴을 정리한 참고 정보이며 카드사 조회나 해지 대행이 아닙니다.",
+    ].join("\n\n");
   }
 
   function updateStatus(key, status) {
@@ -1367,5 +1475,6 @@
     parseTransactions,
     buildCandidates,
     summarizeCardGroups,
+    buildAiPayload,
   };
 })();
