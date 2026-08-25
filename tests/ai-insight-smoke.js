@@ -88,7 +88,7 @@ async function run() {
     assert.equal(options.headers["x-goog-api-key"], "test-gemini-key");
     const body = JSON.parse(options.body);
     assert.equal(body.generationConfig.responseMimeType, "application/json");
-    assert.equal(body.generationConfig.responseSchema.properties.insights.type, "ARRAY");
+    assert.equal(body.generationConfig.responseSchema.type, "ARRAY");
     assert.equal(body.contents[0].parts[0].text.includes("user@example.com"), false);
     assert.equal(body.contents[0].parts[0].text.includes("신한카드"), false);
     return {
@@ -98,8 +98,7 @@ async function run() {
           candidates: [{
             content: {
               parts: [{
-                text: JSON.stringify({
-                  insights: [
+                text: JSON.stringify([
                     {
                       merchantCategory: "Netflix / OTT",
                       candidateReason: "최근 3회 월간 반복 결제가 확인됩니다.",
@@ -116,8 +115,7 @@ async function run() {
                       nextAction: "현재 이용 상태를 계속 확인하세요.",
                       caution: "금융 조언이 아닌 참고 정보입니다.",
                     },
-                  ],
-                }),
+                ]),
               }],
             },
           }],
